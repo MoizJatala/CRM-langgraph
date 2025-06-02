@@ -1,0 +1,230 @@
+{
+  "api_info": {
+    "title": "CRM Agent System",
+    "description": "Multi-agent AI system for CRM operations using LangGraph",
+    "version": "1.0.0",
+    "base_url": "http://localhost:8000"
+  },
+  "server_config": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "debug": true,
+    "cors": {
+      "allow_origins": ["*"],
+      "allow_credentials": true,
+      "allow_methods": ["*"],
+      "allow_headers": ["*"]
+    }
+  },
+  "external_apis": {
+    "openai": {
+      "description": "OpenAI API for language model operations",
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": "https://api.openai.com/v1"
+    },
+    "hubspot": {
+      "description": "HubSpot CRM API for contact and deal management",
+      "api_key_env": "HUBSPOT_API_KEY",
+      "base_url": "https://api.hubapi.com",
+      "endpoints": {
+        "contacts": "/crm/v3/objects/contacts",
+        "deals": "/crm/v3/objects/deals",
+        "companies": "/crm/v3/objects/companies"
+      }
+    },
+    "email": {
+      "description": "SMTP email service configuration",
+      "smtp_server": "smtp.gmail.com",
+      "smtp_port": 587,
+      "username_env": "EMAIL_USERNAME",
+      "password_env": "EMAIL_PASSWORD",
+      "from_email_env": "FROM_EMAIL"
+    }
+  },
+  "database": {
+    "type": "SQLite",
+    "url_env": "DATABASE_URL",
+    "default_url": "sqlite:///./crm_agent.db"
+  },
+  "endpoints": {
+    "system": {
+      "/": {
+        "method": "GET",
+        "description": "Root endpoint with system information",
+        "response": {
+          "message": "CRM Agent System",
+          "version": "1.0.0",
+          "status": "running",
+          "agents": ["GlobalOrchestrator", "HubSpotAgent", "EmailAgent"]
+        }
+      },
+      "/health": {
+        "method": "GET",
+        "description": "Health check endpoint",
+        "response": {
+          "status": "healthy",
+          "timestamp": "ISO datetime",
+          "database": "connected"
+        }
+      }
+    },
+    "query_processing": {
+      "/process-query": {
+        "method": "POST",
+        "description": "Process a user query through the multi-agent system",
+        "request_body": {
+          "query": "string - User query to process"
+        },
+        "response_model": "OrchestrationResult"
+      }
+    },
+    "hubspot_operations": {
+      "/hubspot/create-contact": {
+        "method": "POST",
+        "description": "Create a new contact in HubSpot",
+        "request_body": {
+          "email": "string - Contact email",
+          "firstname": "string - First name",
+          "lastname": "string - Last name",
+          "company": "string - Company name",
+          "phone": "string - Phone number"
+        }
+      },
+      "/hubspot/update-contact": {
+        "method": "POST",
+        "description": "Update an existing contact in HubSpot",
+        "request_body": {
+          "email": "string - Contact email",
+          "firstname": "string - First name",
+          "lastname": "string - Last name",
+          "company": "string - Company name",
+          "phone": "string - Phone number"
+        }
+      },
+      "/hubspot/create-deal": {
+        "method": "POST",
+        "description": "Create a new deal in HubSpot",
+        "request_body": {
+          "dealname": "string - Deal name",
+          "amount": "number - Deal amount",
+          "dealstage": "string - Deal stage",
+          "pipeline": "string - Sales pipeline"
+        }
+      }
+    },
+    "email_operations": {
+      "/email/send-notification": {
+        "method": "POST",
+        "description": "Send email notification",
+        "request_body": {
+          "to": "string - Recipient email",
+          "subject": "string - Email subject",
+          "body": "string - Email body",
+          "html": "boolean - Whether body is HTML"
+        }
+      }
+    },
+    "task_management": {
+      "/tasks/history": {
+        "method": "GET",
+        "description": "Get task execution history",
+        "query_parameters": {
+          "limit": "integer - Number of records to return (default: 50)",
+          "offset": "integer - Number of records to skip (default: 0)"
+        }
+      },
+      "/tasks/{task_id}": {
+        "method": "GET",
+        "description": "Get details of a specific task",
+        "path_parameters": {
+          "task_id": "string - Unique task identifier"
+        }
+      }
+    },
+    "monitoring": {
+      "/agents/status": {
+        "method": "GET",
+        "description": "Get status of all agents",
+        "response": {
+          "orchestrator": "object - Orchestrator agent status",
+          "hubspot": "object - HubSpot agent status",
+          "email": "object - Email agent status"
+        }
+      }
+    }
+  },
+  "data_models": {
+    "UserQuery": {
+      "query": "string - User input query"
+    },
+    "ContactData": {
+      "email": "string - Contact email address",
+      "firstname": "string - First name",
+      "lastname": "string - Last name",
+      "company": "string - Company name",
+      "phone": "string - Phone number"
+    },
+    "DealData": {
+      "dealname": "string - Name of the deal",
+      "amount": "number - Deal amount",
+      "dealstage": "string - Current stage of the deal",
+      "pipeline": "string - Sales pipeline"
+    },
+    "EmailData": {
+      "to": "string - Recipient email address",
+      "subject": "string - Email subject line",
+      "body": "string - Email body content",
+      "html": "boolean - Whether body contains HTML"
+    },
+    "OrchestrationResult": {
+      "task_id": "string - Unique task identifier",
+      "success": "boolean - Whether task completed successfully",
+      "data": "object - Task result data",
+      "error": "string - Error message if failed",
+      "timestamp": "string - ISO datetime of completion"
+    }
+  },
+  "agents": {
+    "GlobalOrchestratorAgent": {
+      "description": "Main orchestrator that coordinates other agents",
+      "capabilities": ["query_processing", "task_routing", "result_aggregation"]
+    },
+    "HubSpotAgent": {
+      "description": "Handles HubSpot CRM operations",
+      "capabilities": ["contact_management", "deal_management", "company_management"]
+    },
+    "EmailAgent": {
+      "description": "Handles email operations and notifications",
+      "capabilities": ["send_email", "email_templates", "notification_management"]
+    }
+  },
+  "environment_variables": {
+    "required": [
+      "OPENAI_API_KEY",
+      "HUBSPOT_API_KEY",
+      "EMAIL_USERNAME",
+      "EMAIL_PASSWORD",
+      "FROM_EMAIL"
+    ],
+    "optional": [
+      "HUBSPOT_BASE_URL",
+      "SMTP_SERVER",
+      "SMTP_PORT",
+      "DATABASE_URL",
+      "API_HOST",
+      "API_PORT",
+      "DEBUG",
+      "LOG_LEVEL"
+    ]
+  },
+  "logging": {
+    "level_env": "LOG_LEVEL",
+    "default_level": "INFO",
+    "supported_levels": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+  },
+  "security": {
+    "api_key_storage": "Environment variables",
+    "cors_policy": "Configurable via middleware",
+    "authentication": "API key based for external services"
+  }
+} 

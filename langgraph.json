@@ -1,0 +1,9 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "email_agent": "./langgraph_graphs.py:email_agent_graph",
+    "hubspot_agent": "./langgraph_graphs.py:hubspot_agent_graph",
+    "orchestrator_agent": "./langgraph_graphs.py:orchestrator_agent_graph"
+  },
+  "env": ".env"
+} 
